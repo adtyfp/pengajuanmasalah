@@ -10,9 +10,22 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
+
+    ->withMiddleware(function (Middleware $middleware) {
+        // ===============================
+        // Middleware alias (pengganti Kernel.php)
+        // ===============================
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'siswa' => \App\Http\Middleware\SiswaMiddleware::class,
+        ]);
+
+        // Jika mau tambah nanti:
+        // 'role' => \App\Http\Middleware\RoleMiddleware::class,
+    })
+
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+
+    ->create();

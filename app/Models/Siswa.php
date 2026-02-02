@@ -9,6 +9,9 @@ class Siswa extends Model
 {
     use HasFactory;
 
+    // Tambahkan ini agar Laravel tidak mencari tabel "siswas"
+    protected $table = 'siswa';
+
     protected $fillable = [
         'user_id',
         'nis',

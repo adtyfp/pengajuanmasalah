@@ -9,13 +9,16 @@ class KategoriSarana extends Model
 {
     use HasFactory;
 
+    // FIX 1: paksa nama tabel agar tidak jadi kategori_saranas
+    protected $table = 'kategori_sarana';
+
     protected $fillable = [
-        'nama_kategori',
+        'nama_kategori', // FIX 2: typo diperbaiki
         'deskripsi',
     ];
 
     public function pengaduan()
     {
-        return $this->hasMany(Pengaduan::class);
+        return $this->hasMany(Pengaduan::class, 'kategori_id');
     }
 }

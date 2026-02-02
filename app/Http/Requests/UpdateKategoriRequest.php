@@ -4,11 +4,11 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreKategoriRequest extends FormRequest
+class UpdateKategoriRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // WAJIB true
+        return true;
     }
 
     public function rules(): array

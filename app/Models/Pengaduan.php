@@ -9,6 +9,9 @@ class Pengaduan extends Model
 {
     use HasFactory;
 
+    // 🔥 TAMBAHKAN INI
+    protected $table = 'pengaduan';
+
     protected $fillable = [
         'siswa_id',
         'kategori_id',

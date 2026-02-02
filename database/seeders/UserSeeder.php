@@ -12,56 +12,69 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create Admin
-        $adminUser = User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@sekolah.id',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        // ===== ADMIN =====
+        $adminUser = User::updateOrCreate(
+            ['email' => 'admin@sekolah.id'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        Admin::create([
-            'user_id' => $adminUser->id,
-            'nama' => 'Admin Sekolah',
-            'email' => 'admin@sekolah.id',
-            'no_telp' => '081234567890',
-        ]);
+        Admin::updateOrCreate(
+            ['user_id' => $adminUser->id],
+            [
+                'nama' => 'Admin Sekolah',
+                'email' => 'admin@sekolah.id',
+                'no_telp' => '081234567890',
+            ]
+        );
 
-        // Create Siswa
-        $siswaUser = User::create([
-            'name' => 'Andi Siswa',
-            'email' => 'andi@siswa.id',
-            'password' => Hash::make('password123'),
-            'role' => 'siswa',
-            'email_verified_at' => now(),
-        ]);
-
-        Siswa::create([
-            'user_id' => $siswaUser->id,
-            'nis' => '2024001',
-            'nama' => 'Andi Siswa',
-            'kelas' => 'XII IPA 1',
-            'email' => 'andi@siswa.id',
-        ]);
-
-        // Create more siswa
-        for ($i = 2; $i <= 5; $i++) {
-            $user = User::create([
-                'name' => 'Siswa ' . $i,
-                'email' => 'siswa' . $i . '@sekolah.id',
+        // ===== SISWA UTAMA =====
+        $siswaUser = User::updateOrCreate(
+            ['email' => 'andi@siswa.id'],
+            [
+                'name' => 'Andi Siswa',
                 'password' => Hash::make('password123'),
                 'role' => 'siswa',
                 'email_verified_at' => now(),
-            ]);
+            ]
+        );
 
-            Siswa::create([
-                'user_id' => $user->id,
-                'nis' => '202400' . $i,
-                'nama' => 'Siswa ' . $i,
-                'kelas' => 'XII IPA ' . $i,
-                'email' => 'siswa' . $i . '@sekolah.id',
-            ]);
+        Siswa::updateOrCreate(
+            ['user_id' => $siswaUser->id],
+            [
+                'nis' => '2024001',
+                'nama' => 'Andi Siswa',
+                'kelas' => 'XII IPA 1',
+                'email' => 'andi@siswa.id',
+            ]
+        );
+
+        // ===== SISWA LAIN =====
+        for ($i = 2; $i <= 5; $i++) {
+
+            $user = User::updateOrCreate(
+                ['email' => "siswa{$i}@sekolah.id"],
+                [
+                    'name' => "Siswa {$i}",
+                    'password' => Hash::make('password123'),
+                    'role' => 'siswa',
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            Siswa::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'nis' => '202400' . $i,
+                    'nama' => "Siswa {$i}",
+                    'kelas' => "XII IPA {$i}",
+                    'email' => "siswa{$i}@sekolah.id",
+                ]
+            );
         }
     }
 }
