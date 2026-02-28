@@ -13,6 +13,7 @@ class PengaduanController extends Controller
     public function index()
     {
         $siswaId = auth()->user()->siswa->id;
+
         $pengaduan = Pengaduan::where('siswa_id', $siswaId)
             ->with(['kategori', 'feedback'])
             ->latest()
@@ -39,13 +40,14 @@ class PengaduanController extends Controller
             'lokasi' => $request->lokasi,
             'prioritas' => $request->prioritas,
             'tanggal_pengaduan' => now(),
+            'status' => 'baru',
         ]);
 
-        // Upload foto pendukung jika ada
+        // Upload foto jika ada
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $foto) {
                 $path = $foto->store('pengaduan/foto', 'public');
-                
+
                 $pengaduan->fotoPendukung()->create([
                     'nama_file' => $foto->getClientOriginalName(),
                     'path' => $path,
@@ -53,19 +55,50 @@ class PengaduanController extends Controller
             }
         }
 
-        return redirect()->route('siswa.pengaduan.index')
+        return redirect()
+            ->route('siswa.pengaduan.index')
             ->with('success', 'Pengaduan berhasil dibuat!');
     }
 
     public function show(Pengaduan $pengaduan)
     {
-        // Pastikan pengaduan milik siswa yang login
+        // Cek kepemilikan
         if ($pengaduan->siswa_id !== auth()->user()->siswa->id) {
             abort(403);
         }
 
-        $pengaduan->load(['kategori', 'fotoPendukung', 'feedback.admin']);
-        
+        $pengaduan->load([
+            'kategori',
+            'fotoPendukung',
+            'feedback.admin'
+        ]);
+
         return view('siswa.pengaduan.show', compact('pengaduan'));
+    }
+
+    public function destroy(Pengaduan $pengaduan)
+    {
+        // Pastikan milik siswa yang login
+        if ($pengaduan->siswa_id !== auth()->user()->siswa->id) {
+            abort(403);
+        }
+
+        // Hanya boleh hapus jika status masih baru
+        if ($pengaduan->status !== 'baru') {
+            return redirect()->back()
+                ->with('error', 'Pengaduan tidak bisa dihapus karena sudah diproses.');
+        }
+
+        // Hapus semua foto dari storage
+        foreach ($pengaduan->fotoPendukung as $foto) {
+            Storage::disk('public')->delete($foto->path);
+            $foto->delete();
+        }
+
+        $pengaduan->delete();
+
+        return redirect()
+            ->route('siswa.pengaduan.index')
+            ->with('success', 'Pengaduan berhasil dihapus.');
     }
 }

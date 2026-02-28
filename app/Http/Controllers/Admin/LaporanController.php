@@ -65,61 +65,53 @@ class LaporanController extends Controller
     }
 
     public function export(Request $request)
-    {
-        $query = Pengaduan::with(['siswa', 'kategori', 'feedback.admin', 'historiStatus'])
-            ->withCount('feedback');
+{
+    $query = Pengaduan::with([
+        'siswa',
+        'kategori',
+        'feedback.admin',
+        'historiStatus.admin',
+        'fotoPendukung'
+    ]);
 
-        // Filter tanggal
-        if ($request->has('start_date') && $request->start_date) {
-            $query->whereDate('tanggal_pengaduan', '>=', $request->start_date);
-        }
-
-        if ($request->has('end_date') && $request->end_date) {
-            $query->whereDate('tanggal_pengaduan', '<=', $request->end_date);
-        }
-
-        // Filter status
-        if ($request->has('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
-        }
-
-        // Filter kategori
-        if ($request->has('kategori') && $request->kategori != 'all') {
-            $query->where('kategori_id', $request->kategori);
-        }
-
-        $pengaduan = $query->get();
-        $total = $pengaduan->count();
-        $selesai = $pengaduan->where('status', 'selesai')->count();
-        $diproses = $pengaduan->where('status', 'diproses')->count();
-        $baru = $pengaduan->where('status', 'baru')->count();
-
-        // Generate PDF - Menggunakan facade yang benar
-        $pdf = PDF::loadView('admin.laporan.export', compact(
-            'pengaduan', 
-            'total', 
-            'selesai', 
-            'diproses', 
-            'baru'
-        ));
-        
-        // Set paper size and orientation
-        $pdf->setPaper('a4', 'landscape');
-        
-        // Set options
-        $pdf->setOptions([
-            'defaultFont' => 'helvetica',
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'enable_php' => true,
-        ]);
-        
-        // Generate filename
-        $filename = 'laporan-pengaduan-' . date('Y-m-d-H-i-s') . '.pdf';
-        
-        // Return PDF for download
-        return $pdf->download($filename);
+    // Filter tanggal
+    if ($request->filled('start_date')) {
+        $query->whereDate('tanggal_pengaduan', '>=', $request->start_date);
     }
+
+    if ($request->filled('end_date')) {
+        $query->whereDate('tanggal_pengaduan', '<=', $request->end_date);
+    }
+
+    // Filter status
+    if ($request->filled('status') && $request->status !== 'all') {
+        $query->where('status', $request->status);
+    }
+
+    // Filter kategori
+    if ($request->filled('kategori') && $request->kategori !== 'all') {
+        $query->where('kategori_id', $request->kategori);
+    }
+
+    $pengaduan = $query->get();
+
+    $total    = $pengaduan->count();
+    $selesai  = $pengaduan->where('status', 'selesai')->count();
+    $diproses = $pengaduan->where('status', 'diproses')->count();
+    $baru     = $pengaduan->where('status', 'baru')->count();
+
+    $pdf = PDF::loadView('admin.laporan.export', compact(
+        'pengaduan',
+        'total',
+        'selesai',
+        'diproses',
+        'baru'
+    ))->setPaper('a4', 'landscape');
+
+    return $pdf->download(
+        'laporan-pengaduan-' . now()->format('Y-m-d-H-i-s') . '.pdf'
+    );
+}
     
     public function preview(Request $request)
     {

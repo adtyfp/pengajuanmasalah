@@ -9,6 +9,9 @@ class FotoPendukung extends Model
 {
     use HasFactory;
 
+    // 🔥 Tambahkan ini agar tidak jadi foto_pendukungs
+    protected $table = 'foto_pendukung';
+
     protected $fillable = [
         'pengaduan_id',
         'nama_file',
@@ -17,6 +20,6 @@ class FotoPendukung extends Model
 
     public function pengaduan()
     {
-        return $this->belongsTo(Pengaduan::class);
+        return $this->belongsTo(Pengaduan::class, 'pengaduan_id');
     }
 }

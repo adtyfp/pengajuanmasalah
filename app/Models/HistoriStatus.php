@@ -9,6 +9,9 @@ class HistoriStatus extends Model
 {
     use HasFactory;
 
+    // 🔥 Tambahkan ini agar tidak jadi histori_statuses
+    protected $table = 'histori_status';
+
     protected $fillable = [
         'pengaduan_id',
         'status_sebelum',
@@ -18,7 +21,7 @@ class HistoriStatus extends Model
 
     public function pengaduan()
     {
-        return $this->belongsTo(Pengaduan::class);
+        return $this->belongsTo(Pengaduan::class, 'pengaduan_id');
     }
 
     public function admin()
